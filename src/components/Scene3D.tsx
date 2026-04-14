@@ -23,13 +23,13 @@ function SlinkyTorus({
 }) {
   const groupRef = useRef<THREE.Group>(null!);
   const ringsGroupRef = useRef<THREE.Group>(null!);
+  const elapsed = useRef(0);
 
   const NUM = 44;
-  const MAJOR_R = 0.9; // distance from center to each ring center (tight hole)
-  const RING_R = 0.45; // radius of each individual ring (narrow slinky)
-  const WIRE = 0.012;  // wire thickness
+  const MAJOR_R = 0.9;
+  const RING_R = 0.45;
+  const WIRE = 0.012;
 
-  // Material
   const material = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
@@ -45,17 +45,16 @@ function SlinkyTorus({
     []
   );
 
-  // Geometry (shared)
   const ringGeo = useMemo(
     () => new THREE.TorusGeometry(RING_R, WIRE, 8, 64),
     []
   );
 
-  // Store refs to each ring mesh
   const meshRefs = useRef<(THREE.Mesh | null)[]>([]);
 
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
+  useFrame((_state, delta) => {
+    elapsed.current += delta;
+    const t = elapsed.current;
     const mx = mouse.current?.x ?? 0;
     const my = mouse.current?.y ?? 0;
 
@@ -119,18 +118,16 @@ function Stardust({
   mouse: React.RefObject<{ x: number; y: number }>;
 }) {
   const ref = useRef<THREE.Points>(null!);
+  const elapsed = useRef(0);
   const COUNT = 500;
 
-  // Store base positions and velocities
   const base = useMemo(() => {
     const positions = new Float32Array(COUNT * 3);
     const velocities = new Float32Array(COUNT * 3);
     for (let i = 0; i < COUNT; i++) {
-      // Spread across a wide field
       positions[i * 3] = (Math.random() - 0.5) * 20;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 14;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 12;
-      // Slow drift velocity
       velocities[i * 3] = (Math.random() - 0.5) * 0.003;
       velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.002;
       velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.001;
@@ -144,10 +141,11 @@ function Stardust({
     return g;
   }, [base]);
 
-  useFrame((state) => {
+  useFrame((_state, delta) => {
     if (!ref.current) return;
+    elapsed.current += delta;
     const posArr = ref.current.geometry.attributes.position.array as Float32Array;
-    const t = state.clock.elapsedTime;
+    const t = elapsed.current;
     const mx = mouse.current?.x ?? 0;
     const my = mouse.current?.y ?? 0;
 
