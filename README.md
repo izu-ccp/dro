@@ -17,6 +17,8 @@ Built with **Next.js 16**, **React 19**, **Google ADK**, **Gemini AI**, and **So
 - [Agent Skills (A2A)](#agent-skills-a2a)
 - [A2A Protocol (Agent-to-Agent)](#a2a-protocol-agent-to-agent)
 - [Smart Contracts](#smart-contracts)
+  - [Deployed Addresses](#deployed-addresses)
+  - [Escrow Flow — Fiat vs Crypto](#escrow-flow--fiat-vs-crypto)
 - [API Routes](#api-routes)
 - [Frontend Pages](#frontend-pages)
 - [AI Integration](#ai-integration)
@@ -230,6 +232,85 @@ Deployed on **Celo Sepolia** (chain ID `11142220`).
 - **Auto-refund** after deadline if still `Funded` or `Disputed`
 - **Owner** resolves disputes with `resolveDispute(releaseToTreasury)`
 - Configurable `protocolFeeBps` and `treasury` address
+
+### Deployed Addresses
+
+| Contract | Address | Explorer |
+|----------|---------|----------|
+| **DroEscrowFactory** | `0xe175B28A80Cc36daE108B69172d44Feb5Ab57327` | [Celoscan](https://sepolia.celoscan.io/address/0xe175B28A80Cc36daE108B69172d44Feb5Ab57327) |
+| **MockUSDC** | `0xc5aDD550534048Ec1f5F65252653D1c744bB4Ac2` | [Celoscan](https://sepolia.celoscan.io/address/0xc5aDD550534048Ec1f5F65252653D1c744bB4Ac2) |
+| **USDT** | `0xC458e1a4eB04cD4E1Fb56B1990cB5E9d35028bb2` | [Celoscan](https://sepolia.celoscan.io/address/0xC458e1a4eB04cD4E1Fb56B1990cB5E9d35028bb2) |
+| **Treasury** | `0x87d7eD4285FE9512d2dC9e0B4B993D377eB0d155` | — |
+
+### Escrow Flow — Fiat vs Crypto
+
+The **Payment Agent** always creates an escrow after payment, regardless of method. The 3-step sequence is:
+
+```
+calculate_fees  →  process payment  →  create_escrow
+```
+
+**Fiat (card/bank):**
+
+```
+User clicks "Pay"
+  │
+  ▼
+Payment Agent: calculate_fees
+  │  platform 1% + escrow 1% + card fee
+  ▼
+Payment Agent: process_fiat_payment
+  │  Simulates Stripe charge → transactionId
+  ▼
+Payment Agent: create_escrow
+  │  Returns escrow intent (factory, buyer, amount, 14-day deadline)
+  ▼
+Server (POST /api/escrow)
+  │  Deployer wallet signs & sends createEscrow() on-chain
+  │  (onlyOwner — must be server-side)
+  ▼
+Escrow created on Celo Sepolia
+  │  Status: Created → auto-refund after 14 days if unfulfilled
+  ▼
+Purchase Agent: execute_purchase
+```
+
+**Crypto (USDC/USDT):**
+
+```
+User clicks "Pay with Crypto"
+  │
+  ▼
+Payment Agent: calculate_fees
+  │  platform 1% + escrow 1% + crypto fee
+  ▼
+Payment Agent: process_crypto_payment
+  │  Returns payment intent (status: awaiting_signature)
+  │  Token address + spender = EscrowFactory
+  ▼
+Payment Agent: create_escrow
+  │  Returns escrow intent + 2 client-side tx steps
+  ▼
+User signs in MetaMask:
+  │  Step 1: approve() — allow factory to spend USDC/USDT
+  │  Step 2: fundEscrow() — lock tokens in the factory
+  ▼
+Escrow funded on Celo Sepolia
+  │  Status: Funded → auto-refund after 14 days if unfulfilled
+  ▼
+Purchase Agent: execute_purchase
+```
+
+**Key differences:**
+
+| | Fiat | Crypto |
+|---|---|---|
+| Payment execution | Server-side (mock Stripe) | Client-side (MetaMask) |
+| Escrow creation | Server signs via deployer key | Server creates, buyer funds via 2 MetaMask txs |
+| User signatures needed | 0 | 2 (approve + fundEscrow) |
+| On-chain token flow | Platform holds funds off-chain | Tokens locked in smart contract |
+| Release | Owner calls `releaseEscrow` → treasury | Owner calls `releaseEscrow` → treasury minus fee |
+| Refund | Owner calls `refundEscrow` | Owner calls `refundEscrow` or `autoRefund` after deadline |
 
 ### Browser Integration (`src/lib/contracts/`)
 
