@@ -46,7 +46,7 @@ export const agentCards: Record<string, AgentCard> = {
     defaultInputModes: ["text"],
     defaultOutputModes: ["text", "data"],
     skills: [
-      { id: "steam_search", name: "Steam Market Search", description: "Search Steam Community Market for game items", tags: ["steam", "cs2", "skins", "gaming"], examples: ["AK-47 Redline", "AWP Asiimov"] },
+      { id: "steam_search", name: "Steam Market Search", description: "Search Steam Community Market for game items", tags: ["steam", "cs2", "skins", "gaming"], examples: ["AWP Asiimov", "Karambit Doppler"] },
       { id: "float_check", name: "Float Check", description: "Check CS2 skin float value and wear", tags: ["cs2", "float", "inspect"] },
       { id: "price_history", name: "Price History", description: "Get Steam market price history for an item", tags: ["steam", "prices", "history"] },
     ],

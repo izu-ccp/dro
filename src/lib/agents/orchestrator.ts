@@ -151,7 +151,7 @@ export class OrchestratorAgent extends BaseAgent {
       message: "I can help you search for products, compare prices, make purchases, track orders, or handle disputes. What would you like to do?",
       data: {
         suggestions: [
-          "Search for AK-47 Redline",
+          "Search for AWP Asiimov",
           "Compare prices for AWP Asiimov",
           "Track my order PB-20260407-0042",
           "Open a dispute",
@@ -351,7 +351,7 @@ Examples of reasoning:
 - "laptop" → CLEAR. Search directly.
 - "Nike shoes" → CLEAR. Search directly.
 - "iPhone 15 Pro" → CLEAR. Search directly.
-- "AK-47 Redline" → CLEAR. Search directly.
+- "AWP Asiimov" → CLEAR. Search directly.
 - "cricket bat under 100" → CLEAR. Search directly for "cricket bat".
 - "wireless earbuds" → CLEAR. Search directly.
 - "find a bat under 100" → AMBIGUOUS. "bat" alone is vague. Suggest: "Cricket Bat", "Baseball Bat", "Table Tennis Bat".
@@ -677,7 +677,7 @@ Your personality: helpful, concise, friendly. Keep responses under 3-4 sentences
 
 Capabilities you can mention:
 - Search products: "find me a laptop", "Nike shoes under $100"
-- Gaming/CS2 skins: "AK-47 Redline", "AWP Dragon Lore"
+- Gaming/CS2 skins: "AWP Asiimov", "Karambit Doppler"
 - Compare prices across stores
 - Buy with escrow protection (funds held until delivery confirmed)
 - Track orders

@@ -125,7 +125,7 @@ export default function AgentChat() {
                   <p>prices, orders, or tracking.</p>
                   <div className="mt-4 space-y-1">
                     {[
-                      "Search for AK-47 Redline",
+                      "Search for RTX 4070",
                       "Track order PB-20260407-0042",
                       "Compare CS2 skin prices",
                     ].map((suggestion) => (

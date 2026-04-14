@@ -104,7 +104,7 @@ export default function DashboardPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder='Search anything — "AK-47 Redline" · "Logitech MX Master"'
+              placeholder='Search anything — "AWP Asiimov" · "Logitech MX Master"'
               className="flex-1 bg-transparent py-3 text-[13px] text-white placeholder:text-white/20 focus:outline-none font-mono"
             />
             <button

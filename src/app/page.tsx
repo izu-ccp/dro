@@ -89,7 +89,7 @@ export default function Home() {
   // Typewriter
   const [placeholder, setPlaceholder] = useState("");
   const suggestions = [
-    "I want a CS2 AK-47 Redline under $30",
+    "Find the best deal on a CS2 AWP Asiimov",
     "Find the cheapest RTX 4070",
     "AWP Dragon Lore Factory New",
     "Nike Dunk Low Panda size 10",

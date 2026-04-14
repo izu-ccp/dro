@@ -27,7 +27,7 @@ import type { Product } from "@/lib/mockData";
 function ResultsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const query = searchParams.get("q") || "CS2 AK-47 Redline";
+  const query = searchParams.get("q") || "CS2 AWP Asiimov";
   const [refinement, setRefinement] = useState("");
   const [sortBy, setSortBy] = useState<"best" | "price_low" | "price_high" | "rating">("best");
   const [showSortMenu, setShowSortMenu] = useState(false);
