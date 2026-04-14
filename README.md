@@ -19,6 +19,7 @@ Built with **Next.js 16**, **React 19**, **Google ADK**, **Gemini AI**, and **So
 - [Smart Contracts](#smart-contracts)
   - [Deployed Addresses](#deployed-addresses)
   - [Escrow Flow — Fiat vs Crypto](#escrow-flow--fiat-vs-crypto)
+  - [Escrow State Machine](#escrow-state-machine)
 - [API Routes](#api-routes)
 - [Frontend Pages](#frontend-pages)
 - [AI Integration](#ai-integration)
@@ -311,6 +312,63 @@ Purchase Agent: execute_purchase
 | On-chain token flow | Platform holds funds off-chain | Tokens locked in smart contract |
 | Release | Owner calls `releaseEscrow` → treasury | Owner calls `releaseEscrow` → treasury minus fee |
 | Refund | Owner calls `refundEscrow` | Owner calls `refundEscrow` or `autoRefund` after deadline |
+
+### Escrow State Machine
+
+```
+                         createEscrow (owner)
+                              │
+                              ▼
+                          ┌────────┐
+                          │Created │
+                          └───┬────┘
+                              │ fundEscrow (buyer)
+                              ▼
+                          ┌────────┐
+              ┌───────────│ Funded │───────────┐
+              │           └───┬────┘           │
+              │               │                │
+   releaseEscrow (owner)      │      disputeEscrow (buyer)
+              │               │                │
+              ▼               │                ▼
+         ┌──────────┐        │          ┌──────────┐
+         │ Released │        │          │ Disputed │
+         └──────────┘        │          └────┬─────┘
+           payout →          │               │
+           treasury          │    ┌──────────┼──────────┐
+           fee → owner       │    │          │          │
+                              │    │  resolveDispute     │
+                              │    │  (owner)            │
+                              │    ▼                     ▼
+                              │  true→Released    false→Refunded
+                              │
+                              │  autoRefund (anyone, after deadline)
+                              │  works from Funded OR Disputed
+                              ▼
+                          ┌──────────┐
+                          │ Refunded │
+                          └──────────┘
+                            full amount
+                            → buyer
+```
+
+**After Funded — three possible outcomes:**
+
+| Action | Who Calls | Trigger | Token Flow | Final Status |
+|--------|-----------|---------|------------|--------------|
+| `releaseEscrow` | Owner (platform) | Delivery confirmed | Payout → treasury, 1% fee → owner | `Released` |
+| `disputeEscrow` | Buyer | Problem reported | Funds frozen in contract | `Disputed` |
+| `autoRefund` | Anyone | Deadline passes (14 days) | Full amount → buyer | `Refunded` |
+
+**After Disputed — two possible outcomes:**
+
+| Action | Who Calls | Decision | Token Flow | Final Status |
+|--------|-----------|----------|------------|--------------|
+| `resolveDispute(true)` | Owner (platform) | Seller wins | Payout → treasury, 1% fee → owner | `Released` |
+| `resolveDispute(false)` | Owner (platform) | Buyer wins | Full amount → buyer | `Refunded` |
+| `autoRefund` | Anyone | Deadline passes | Full amount → buyer | `Refunded` |
+
+**Terminal states:** Both `Released` and `Refunded` are final — no further transitions possible.
 
 ### Browser Integration (`src/lib/contracts/`)
 
