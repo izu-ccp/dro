@@ -52,6 +52,12 @@ export default function Navbar() {
           >
             History
           </Link>
+          <Link
+            href="/admin"
+            className="hidden sm:block px-4 py-2 text-[13px] font-mono tracking-wide text-white/40 hover:text-white transition-colors duration-300"
+          >
+            Admin
+          </Link>
 
           {/* Connect Wallet Button */}
           <button
