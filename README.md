@@ -14,6 +14,7 @@ Built with **Next.js 16**, **React 19**, **Google ADK**, **Gemini AI**, and **So
   - [Agent Catalog](#agent-catalog)
 - [Tool System](#tool-system)
 - [Google ADK Integration](#google-adk-integration)
+- [Agent Skills (A2A)](#agent-skills-a2a)
 - [A2A Protocol (Agent-to-Agent)](#a2a-protocol-agent-to-agent)
 - [Smart Contracts](#smart-contracts)
 - [API Routes](#api-routes)
@@ -167,6 +168,33 @@ The `src/lib/adk/` layer bridges the tool system into [Google's Agent Developmen
 - **`agents.ts`** — Defines `LlmAgent` instances (one per specialist) with system instructions and attached `FunctionTool`s. The `rootAgent` (`dro_orchestrator`) has all specialists as `subAgents` and uses LLM-driven transfer for delegation. Model: `gemini-2.5-flash-lite`.
 - **`tools.ts`** — Wraps each `ToolDefinition.execute` in a `FunctionTool` with Zod schemas. Groups tools by category (search, steam, marketplace, analysis, payment, purchase, tracking, dispute).
 - **`runner.ts`** — `Runner` with `InMemorySessionService`. `runAgent(message, opts)` streams events, collects structured output from agent state keys (`web_search_results`, `steam_results`, `payment_results`, etc.), and normalizes products via `extractProducts()`.
+
+---
+
+## Agent Skills (A2A)
+
+Each agent advertises discoverable **skills** via A2A agent cards. External agents or systems can query `GET /.well-known/agent.json` to find which agent handles a given capability.
+
+| Agent | Skill | Description | Tags |
+|-------|-------|-------------|------|
+| **Orchestrator** | `route` — Intent Routing | Classifies user intent and delegates to the right agent | `routing`, `orchestration` |
+| | `workflow` — Multi-Agent Workflow | Coordinates sequential workflows (search → compare → buy) | `workflow`, `pipeline` |
+| **Web Search** | `product_search` — Product Search | Search for products by name, category, or description | `search`, `products`, `shopping` |
+| **Steam** | `steam_search` — Steam Market Search | Search Steam Community Market for game items | `steam`, `cs2`, `skins`, `gaming` |
+| | `float_check` — Float Check | Check CS2 skin float value and wear | `cs2`, `float`, `inspect` |
+| | `price_history` — Price History | Get Steam market price history for an item | `steam`, `prices`, `history` |
+| **Digital Marketplace** | `marketplace_search` — Marketplace Search | Search Skinport, Buff163, G2A in parallel | `skinport`, `buff163`, `g2a` |
+| **Price Comparison** | `compare` — Price Compare | Compare prices across multiple sources | `compare`, `prices`, `deals` |
+| | `fees` — Fee Calculator | Calculate total cost including protocol and platform fees | `fees`, `cost` |
+| **Payment** | `fiat_pay` — Fiat Payment | Process card/bank payments via Stripe | `payment`, `fiat`, `stripe` |
+| | `crypto_pay` — Crypto Payment | Process USDC/USDT payments on Celo | `payment`, `crypto`, `celo`, `usdc` |
+| | `escrow` — Escrow | Deploy and manage escrow smart contracts | `escrow`, `smart-contract`, `celo` |
+| **Purchase** | `buy` — Execute Purchase | Buy an item from the source marketplace | `purchase`, `buy`, `order` |
+| **Order Tracking** | `track_order` — Track Order | Get order status and timeline | `tracking`, `order`, `status` |
+| | `track_shipping` — Track Shipping | Track carrier shipment | `tracking`, `shipping`, `delivery` |
+| **Dispute & Refund** | `dispute` — Open Dispute | Open a dispute on an order and freeze escrow | `dispute`, `refund`, `escrow` |
+| **Health Monitor** | `health_check` — Health Check | Run full E2E health checks across all endpoints | `health`, `monitoring`, `e2e` |
+| | `diagnose` — Diagnose Issues | Identify root cause of failures and suggest code fixes | `debug`, `fix`, `diagnose` |
 
 ---
 
