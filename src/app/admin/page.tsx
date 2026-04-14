@@ -190,6 +190,7 @@ export default function AdminPage() {
               <input
                 type="text"
                 value={escrowIdInput}
+                onFocus={() => { setOrderIdInput(""); setResult(null); }}
                 onChange={(e) => { setEscrowIdInput(e.target.value); setResult(null); }}
                 placeholder="0x + 64 hex characters"
                 className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-[13px] font-mono text-white placeholder-white/15 focus:outline-none focus:border-accent/30 transition-colors"
@@ -208,6 +209,7 @@ export default function AdminPage() {
               <input
                 type="text"
                 value={orderIdInput}
+                onFocus={() => { setEscrowIdInput(""); setResult(null); }}
                 onChange={(e) => { setOrderIdInput(e.target.value); setResult(null); }}
                 placeholder="PB-20260407-0042"
                 className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-[13px] font-mono text-white placeholder-white/15 focus:outline-none focus:border-accent/30 transition-colors"
