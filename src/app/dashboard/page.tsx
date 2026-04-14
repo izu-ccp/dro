@@ -24,11 +24,19 @@ import Navbar from "@/components/Navbar";
 import { mockOrders, pastOrders } from "@/lib/mockData";
 import { useWallet } from "@/lib/wallet/context";
 
+const allOrders = [...mockOrders, ...pastOrders];
+const totalOrders = allOrders.length;
+const totalSpent = allOrders.reduce((s, o) => s + o.price, 0);
+const activeEscrow = mockOrders
+  .filter((o) => o.status !== "delivered")
+  .reduce((s, o) => s + o.price, 0);
+const totalSaved = Math.round(totalSpent * 0.065);
+
 const stats = [
-  { label: "Orders", value: "12", icon: <ShoppingBag className="w-5 h-5" /> },
-  { label: "Spent", value: "$1,240", icon: <DollarSign className="w-5 h-5" /> },
-  { label: "Saved", value: "$89", icon: <PiggyBank className="w-5 h-5" /> },
-  { label: "Escrowed", value: "$28", icon: <Lock className="w-5 h-5" /> },
+  { label: "Orders", value: `${totalOrders}`, icon: <ShoppingBag className="w-5 h-5" /> },
+  { label: "Spent", value: `$${totalSpent.toFixed(2)}`, icon: <DollarSign className="w-5 h-5" /> },
+  { label: "Saved", value: `$${totalSaved}`, icon: <PiggyBank className="w-5 h-5" /> },
+  { label: "Escrowed", value: `$${activeEscrow.toFixed(2)}`, icon: <Lock className="w-5 h-5" /> },
 ];
 
 export default function DashboardPage() {

@@ -41,17 +41,28 @@ async function sendTx(data: string): Promise<string> {
 async function readEscrow(escrowId: string) {
   const data = SELECTORS.getEscrow + encBytes32(escrowId);
   const provider = new JsonRpcProvider(RPC);
-  const result = await provider.call({ to: ESCROW_FACTORY, data });
+
+  let result: string;
+  try {
+    result = await provider.call({ to: ESCROW_FACTORY, data });
+  } catch {
+    return null;
+  }
 
   if (!result || result === "0x" || result.length < 450) return null;
 
   const words = result.slice(2).match(/.{64}/g) ?? [];
+  if (!words || words.length < 8) return null;
+
   const statusNames = ["Created", "Funded", "Released", "Refunded", "Disputed"];
   const statusNum = Number(BigInt("0x" + words[6]));
+  const buyer = "0x" + words[2].slice(24);
+
+  if (buyer === "0x0000000000000000000000000000000000000000") return null;
 
   return {
     escrowId,
-    buyer: "0x" + words[2].slice(24),
+    buyer,
     token: "0x" + words[3].slice(24),
     amount: Number(BigInt("0x" + words[4])) / 1e6,
     amountRaw: BigInt("0x" + words[4]).toString(),
@@ -108,7 +119,22 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Admin escrow error:", error);
-    const msg = error instanceof Error ? error.message : "Operation failed";
+    let msg = "Operation failed";
+    if (error instanceof Error) {
+      if (error.message.includes("EscrowNotFound") || error.message.includes("require(false)") || error.message.includes("no data present")) {
+        msg = "Escrow not found. Make sure you entered a valid escrow ID (bytes32 hash), not a contract address.";
+      } else if (error.message.includes("InvalidStatus")) {
+        msg = "Invalid escrow status for this action. The escrow may already be released or refunded.";
+      } else if (error.message.includes("NotBuyer")) {
+        msg = "Only the buyer can perform this action.";
+      } else if (error.message.includes("DeadlineNotPassed")) {
+        msg = "The escrow deadline has not passed yet. Auto-refund is not available.";
+      } else if (error.message.includes("DEPLOYER_PRIVATE_KEY")) {
+        msg = "Server configuration error: deployer key not set.";
+      } else {
+        msg = error.message.length > 200 ? error.message.slice(0, 200) + "..." : error.message;
+      }
+    }
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

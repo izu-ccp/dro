@@ -87,6 +87,14 @@ export default function AdminPage() {
       if (!id.startsWith("0x")) {
         const { keccak256, toUtf8Bytes } = await import("ethers");
         eid = keccak256(toUtf8Bytes(id));
+      } else if (id.length === 42) {
+        setResult({ error: "That looks like a contract/wallet address (20 bytes). Escrow IDs are 32-byte hashes (66 chars with 0x prefix). Try entering the Order ID string instead — it will be hashed automatically." });
+        setLoading(false);
+        return;
+      } else if (id.length !== 66) {
+        setResult({ error: `Invalid escrow ID length. Expected 66 characters (0x + 64 hex), got ${id.length}. Try entering the Order ID string instead.` });
+        setLoading(false);
+        return;
       }
 
       const res = await fetch("/api/admin/escrow", {
@@ -182,27 +190,29 @@ export default function AdminPage() {
               <input
                 type="text"
                 value={escrowIdInput}
-                onChange={(e) => setEscrowIdInput(e.target.value)}
-                placeholder="0x..."
+                onChange={(e) => { setEscrowIdInput(e.target.value); setResult(null); }}
+                placeholder="0x + 64 hex characters"
                 className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-[13px] font-mono text-white placeholder-white/15 focus:outline-none focus:border-accent/30 transition-colors"
               />
+              <p className="text-[10px] font-mono text-white/10 mt-1.5">keccak256 hash of the order ID — not a contract address</p>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-white/5" />
-              <span className="text-[10px] font-mono text-white/15">OR</span>
+              <span className="text-[10px] font-mono text-white/15">OR (recommended)</span>
               <div className="flex-1 h-px bg-white/5" />
             </div>
 
             <div>
-              <label className="text-[11px] font-mono text-white/20 mb-1.5 block">Order ID (string → keccak256)</label>
+              <label className="text-[11px] font-mono text-white/20 mb-1.5 block">Order ID (string → auto-hashed)</label>
               <input
                 type="text"
                 value={orderIdInput}
-                onChange={(e) => setOrderIdInput(e.target.value)}
-                placeholder="ORD-xxxx-xxxx"
+                onChange={(e) => { setOrderIdInput(e.target.value); setResult(null); }}
+                placeholder="PB-20260407-0042"
                 className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-[13px] font-mono text-white placeholder-white/15 focus:outline-none focus:border-accent/30 transition-colors"
               />
+              <p className="text-[10px] font-mono text-white/10 mt-1.5">Enter the order ID as-is — it will be hashed to the escrow ID automatically</p>
             </div>
 
             <button
@@ -235,8 +245,8 @@ export default function AdminPage() {
                   : <CheckCircle2 className="w-4 h-4 text-neon-green" />
                 }
               </div>
-              <div className="flex-1 min-w-0">
-                <p className={`text-[13px] font-mono leading-relaxed ${result.error ? "text-red-400/80" : "text-neon-green/80"}`}>
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <p className={`text-[13px] font-mono leading-relaxed break-words ${result.error ? "text-red-400/80" : "text-neon-green/80"}`}>
                   {result.error
                     ? result.error
                     : `${result.action?.toUpperCase()} successful`
